@@ -17,27 +17,71 @@ open (FILE,"< out") || die "Can't open file: out";
 close(FILE);
 
 sub ParseLog{
-my $n = 0;
-	foreach my $str(@_){
-		my($date, $time, $int_id, $flag)=split(/ /,$str);
-		$str =~s/$date $time //;
-		print "$date, $time, $int_id, ";
+my $n = 0;#Total counter
+my $m = 0;#Счетчик сообщений
+my $l = 0;#Счетчик прочих строк
+my $source = '';
+my %data = ();
 
-		if ($flag eq '<='){		
+	foreach my $str(@_){
+		$source = '';
+		my($date, $time, $int_id, $flag)=split(/ /,$str);
+		$str =~s/$date $time //;#Убираем timestamp
+
+		if ($flag eq '<='){
 			my $id = $str;
-			$id =~s/id=(.*)//;
-			print "$1" if($1);
-			print "\n";
-			$n++;
+			$id =~s/id=(.*)//;#Crop id
+			if($1){
+				$id = $1;
+			}else{
+				$id = '';
+
+			};
+
+			$source = 'message';
+			%data = (
+				created => "$date $time",
+				int_id => "$int_id",
+				str => "$str",
+				id => "$id",
+			);
+			$m++;
 
 		}else{
-			my $address = 
+			my $address = $str;
+			$address =~s/ (.+\@.+\.[a-z]+) R=//;#Crop email
+			if($1){
+				($flag, $address) = split(/ /,$1);
+				
+			}else{
+				$address = '';
+
+			};
+			
+			$int_id = '' if($int_id!~m/\w{6}\-\w{6}\-\w{2}/);#Checkng exists of int_id
+		
+			$source = 'log';
+			%data = (
+				created => "$date $time",
+				int_id => "$int_id",
+				str => "$str",
+				address => "$address",
+			);
+			$l++;
 
 		};
+
+		$dbi->insert(
+			{%data},
+			table => $source,	
+		);
+		%data = ();
+		$n++;
+		print "Parse string: $n\tmsg=$m\tlog=$l\n";
 	};
-	
+
+print "Import completed.\n";
 1;
 };
-
 
 1;
