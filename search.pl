@@ -16,11 +16,12 @@ my $q = CGI->new();
 my $address = $q->param('address') || '';
 
 my $dbi = DBIx::Custom->connect(
-   dsn => "dbi:mysql:database=$config->{'database'}",
-   user => $config->{'user'},
-   password => $config->{'pass'},
-   option => {mysql_enable_utf8 => 1}
-);
+			dsn => $config->{dsn},
+			user => $config->{user},
+			password => $config->{password},
+			option => {mysql_enable_utf8 => 1}
+	);
+$dbi->execute('SET NAMES utf8');
 
 my $limit = 100;
 
