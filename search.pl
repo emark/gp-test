@@ -5,15 +5,19 @@ use warnings;
 use utf8;
 use DBIx::Custom;
 use CGI qw/:standard/;
+use YAML::XS 'LoadFile';
+use Data::Dump qw(dump);
+
+my $config = LoadFile('config.yaml');
 
 my $q = CGI->new();
 my $address = $q->param('address') || '';
 
 my $dbi = DBIx::Custom->connect(
-  "dbi:mysql:database=gptest",
-  'root',
-  'admin',
-  {mysql_enable_utf8 => 1}
+   dsn => "dbi:mysql:database=$config->{'database'}",
+   user => $config->{'user'},
+   password => $config->{'pass'},
+   option => {mysql_enable_utf8 => 1}
 );
 
 my $limit = 100;
