@@ -12,7 +12,7 @@ my $dbi = DBIx::Custom->connect(
   {mysql_enable_utf8 => 1}
 );
 
-open (FILE,"< out") || die "Can't open file: out";
+open (FILE,"< source/out") || die "Can't open file: out";
 	&ParseLog(<FILE>);
 close(FILE);
 
@@ -49,7 +49,7 @@ my %data = ();
 
 		}else{
 			my $address = $str;
-			$address =~s/ (.+\@.+\.[a-z]+) R=//;#Crop email
+			$address =~s/ (.+\@.+\.[a-z]+)\:* //;#Crop email
 			if($1){
 				($flag, $address) = split(/ /,$1);
 				
