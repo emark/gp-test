@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use lib '/home/eskenergia/perl5/lib/perl5';
+use lib '/home/hosting_3bears/perl5/lib/perl5';
 
 use DBIx::Custom;
 use YAML::XS 'LoadFile';
