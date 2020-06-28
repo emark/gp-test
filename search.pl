@@ -16,6 +16,8 @@ my $dbi = DBIx::Custom->connect(
   {mysql_enable_utf8 => 1}
 );
 
+my $limit = 100;
+
 print $q->header();
 
 print "<html><head><title>Search</title></head><body><h1>Search form</h1><form method=post><input type=text value=\"$address\" name=address>&nbsp;<input type=submit value=Search>";
@@ -31,8 +33,26 @@ if($address){
 	print "<pre>\n\n";
 	print "Result for address: $address\n\n<ol>";
 	
+	my $n = 0;
 	foreach my $int_id(@{$result}){
-		print "<li>$int_id->[0]</li>\n";
+		my $result = $dbi->execute(
+			"select message.created, str from message where int_id=:int_id union select created, str from log where int_id=:int_id order by created",
+			{int_id => $int_id->[0]},
+	
+		)->fetch_all;
+
+		foreach my $row(@{$result}){
+			print "<li>$row->[0]\t$row->[1]\n";
+			$n++;
+			if($n == $limit){
+				print "\nReached limit rows.";
+				print "</ol></pre>";
+				print "</body></html>";
+				exit;
+
+			};
+		};
+
 	};
 
 	print "</ol></pre>";
@@ -40,4 +60,5 @@ if($address){
 };
 
 print "</body></html>";
+
 1;
